@@ -1,0 +1,45 @@
+CREATE OR REPLACE VIEW q1 ( country_name ) AS
+	SELECT name
+	FROM countries
+	WHERE continent = "Africa" AND population > 100000000
+;
+
+CREATE OR REPLACE VIEW q2 ( continent , country_count ) AS
+	SELECT C.continent, COUNT(*)
+	FROM countries C
+	WHERE C.iso2 NOT IN (
+		SELECT A.country_iso2
+		FROM airports A
+	)
+	GROUP BY (C.continent)
+;
+
+CREATE OR REPLACE VIEW q3 ( country_name , border_count ) AS
+	SELECT name, count
+	FROM (
+		SELECT C.name, COUNT(*) AS count
+		FROM countries C, borders B
+		WHERE C.iso2 = B.country1_iso2
+		GROUP BY C.iso2
+	)
+	ORDER BY count DESC
+	LIMIT 10
+;
+
+CREATE OR REPLACE VIEW q4 ( country_name1 , country_name2 ) AS
+	SELECT C1.name, C2.name
+	FROM countries C1, countries C2, borders B
+	Where C1.iso2 = B.country1_iso2 AND C2.iso2 = B.country2.iso2
+		AND C1.continent = "Europe" AND C2.continent = "Asia"
+;
+
+CREATE OR REPLACE VIEW q5 ( country_name ) AS
+	SELECT name
+	FROM countries
+	WHERE continent = "ASIA"
+	EXCEPT
+	SELECT C.name
+	FROM countries C, Airports A, routes R
+	WHERE C.iso2 = A.country_iso2 AND R.to_code = A.code
+		AND C.continent = "Asia" AND R.airline_code = "SQ"
+;
